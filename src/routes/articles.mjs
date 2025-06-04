@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import {
     getArticlesHandler,
-    postArticlesHandler,
+    postArticleHandler,
     getArticleByIdHandler,
     putArticleByIdHandler,
     deleteArticleByIdHandler
@@ -15,7 +15,7 @@ const articlesRouter = Router()
 articlesRouter
     .route('/')
     .get(getArticlesHandler)
-    .post(validateArticleBody, postArticlesHandler)
+    .post(validateArticleBody, postArticleHandler)
 
 articlesRouter
     .route('/:id')

@@ -57,8 +57,8 @@ const getUserByIdHandler = async (req, res) => {
         if (!db) {
             return res.status(500).json({ message: 'Error: DB is not connected' });
         }
-        const userId = req.params.id;
 
+        const userId = req.params.id;
         const usersCollection = db.collection('users');
 
         const userProfile = await usersCollection.findOne({ _id: new ObjectId(userId) });

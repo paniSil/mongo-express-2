@@ -37,7 +37,7 @@ html(lang="en")
               br
       if user
         div.mr-3.mt-4 Current user: #{user.email}
-          div
+          div.mb-4
             form(action="/auth/logout" method="POST" style="display:inline;")
               button.btn.btn-primary.btn-sm.mt-2.theme-btn(type="submit") Logout
 

@@ -4,18 +4,37 @@ import {
     postArticleHandler,
     getArticleByIdHandler,
     putArticleByIdHandler,
-    deleteArticleByIdHandler
+    deleteArticleByIdHandler,
+    addNewArticlePageHandler,
+    addNewArticleHandler,
+    postManyArticlesHandler,
+    putManyArticlesHandler,
+    deleteManyArticles,
+    replaceArticleHandler
 } from '../controllers/articles.mjs'
 
-import { validateArticleBody, validateParamsArticleId } from '../validators/articleValidation.mjs'
+import { validateArticleBody, validateParamsArticleId, validateUpdateManyArticlesBody, validateReplaceArticle } from '../validators/articleValidation.mjs'
 
 
 const articlesRouter = Router()
+
+articlesRouter.get('/new', addNewArticlePageHandler);
+articlesRouter.post('/new', validateArticleBody, addNewArticleHandler);
 
 articlesRouter
     .route('/')
     .get(getArticlesHandler)
     .post(validateArticleBody, postArticleHandler)
+
+articlesRouter
+    .route('/many')
+    .post(postManyArticlesHandler)
+    .put(validateUpdateManyArticlesBody, putManyArticlesHandler)
+    .delete(deleteManyArticles)
+
+articlesRouter
+    .route('/replace')
+    .put(validateReplaceArticle, replaceArticleHandler)
 
 articlesRouter
     .route('/:id')

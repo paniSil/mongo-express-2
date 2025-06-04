@@ -28,8 +28,9 @@
 
 ## 2. Основа сервера
 
-Попередні версії сервера доступні за посиланнями [https://github.com/paniSil/hillel-express-2](https://github.com/paniSil/hillel-express-2), [https://github.com/paniSil/hillel-express-3](https://github.com/paniSil/hillel-express-3), [https://github.com/paniSil/hillel-express-4](https://github.com/paniSil/hillel-express-4) та [https://github.com/paniSil/hillel-express-5](https://github.com/paniSil/hillel-express-5).
-В поточній версії аутентифікація та авторизація реалізовані за допомогою Passport.js з використанням сесій. Всі дані користувачів тепер зберігаються та керуються в хмарній базі даних MongoDB Atlas. Валідація вхідних даних присутня. Для конфігураційних даних, таких як секретний ключ сесії та URI бази даних, використовуються змінні середовища (.env).
+Попередні версії сервера доступні за посиланнями [https://github.com/paniSil/hillel-express-2](https://github.com/paniSil/hillel-express-2), [https://github.com/paniSil/hillel-express-3](https://github.com/paniSil/hillel-express-3), [https://github.com/paniSil/hillel-express-4](https://github.com/paniSil/hillel-express-4), [https://github.com/paniSil/hillel-express-5](https://github.com/paniSil/hillel-express-5) та [https://github.com/paniSil/mongo-express-1](https://github.com/paniSil/mongo-express-1).
+В поточній версії аутентифікація та авторизація реалізовані за допомогою Passport.js з використанням сесій. Всі дані користувачів та статей тепер зберігаються та керуються в хмарній базі даних MongoDB Atlas. Валідація вхідних даних присутня. Для конфігураційних даних, таких як секретний ключ сесії та URI бази даних, використовуються змінні середовища (.env).
+Для статей додано розширене читання за допомогою find та projection, маршрути для додавання одного та багатьох документів, маршрути для оновлення і заміно одного документа, маршрут для оновлення багатьох документів, маршрути для видалення одного та багатьох документів. Додана ejs сторінка для додавання нової статті.
 
 ---
 
@@ -81,7 +82,7 @@
 - Якщо роль користувача (`req.user.role`) не відповідає дозволеним ролям, повертає 403 Forbidden.
 - Застосовується до маршрутів, що вимагають специфічних прав доступу.
 
-### 3.9. Валідатори (`validateUserBody`, `validateParamsUserId`, `validateArticleBody`, `validateParamsArticleId`) (`src/validators/articleValidation.mjs`, `src/validators/userValidation.mjs`)
+### 3.9. Валідатори (`validateUserBody`, `validateParamsUserId`, `validateArticleBody`, `validateParamsArticleId`, `validateUpdateManyArticlesBody`, `validateReplaceArticle`) (`src/validators/articleValidation.mjs`, `src/validators/userValidation.mjs`)
 
 Виконують валідацію вхідних даних (тіла запиту або параметрів URL) за допомогою бібліотек **Joi** та **Celebrate**. Якщо дані не проходять валідацію, повертає 400 Bad Request з текстовим описом помилки.
 
@@ -150,13 +151,31 @@
 
 ### 4.5. Статті (`/articles`)
 
-Ці маршрути тепер **захищені** Passport.js-аутентифікацією та **авторизацією за ролями** (`authorize('admin')`). Доступ дозволено лише автентифікованим користувачам з відповідною роллю (наприклад, 'admin'). Інтеграція MongoDB Atlas в даній версії відсутня.
+Ці маршрути тепер **захищені** Passport.js-аутентифікацією та **авторизацією за ролями** (`authorize('admin')`). Доступ дозволено лише автентифікованим користувачам з відповідною роллю (наприклад, 'admin'). Всі операції читання, створення, оновлення та видалення користувачів тепер взаємодіють з колекцією users у MongoDB Atlas. При створенні та оновленні статтей, до її записів в MongoDB автоматично додаються поля createdAt та updatedAt для відстеження часу створення та останнього оновлення відповідно.
 
-- **`/articles` (GET)**: Отримати всі статті.
-- **`/articles` (POST)**: Додати нову статтю.
-- **`/articles/:id` (GET)**: Отримати статтю за ID.
-- **`/articles/:id` (PUT)**: Оновити статтю за ID.
-- **`/articles/:id` (DELETE)**: Видалити статтю за ID.
+#### Створення даних
+
+- **insertOne**: POST /articles — створення однієї статті (тіло: { title, text })
+- **insertMany**: POST /articles/many — створення багатьох статей (масив об'єктів)
+
+#### Оновлення даних
+
+- **updateOne**: PUT /articles/:id — оновлення однієї статті за ID (тіло: { title?, text? })
+- **updateMany**: PUT /articles/many — оновлення багатьох статей за фільтром (тіло: { filter, update })
+- **replaceOne**: PUT /articles/replace — повна заміна статті за фільтром (тіло: { query, replacement })
+
+#### Видалення даних
+
+- **deleteOne**: DELETE /articles/:id — видалення однієї статті за ID
+- **deleteMany**: DELETE /articles/many — видалення багатьох статей за фільтром (тіло: фільтр)
+
+#### Розширене читання
+
+- **`/articles` (GET)**: Отримати всі статті. Підтримує:
+  - фільтрацію за будь-яким полем (наприклад, ?title=Test)
+  - проекцію (тільки потрібні поля): ?projection={"title":1,"createdAt":1}
+  - сортування: ?sort={"createdAt":-1}
+  - ліміти та пропуски: ?limit=5&skip=10
 
 ### 4.6. Управління cookies (Демонстраційні маршрути)
 
@@ -185,6 +204,7 @@
 
 - сторінка списку всіх статей (`/articles`).
 - сторінка окремої статті (`/articles/:id`).
+- сторінка для додавання нової статті (`/articles/new`)
 
 ---
 
@@ -266,3 +286,5 @@ node src/server.mjs`
 ### 10.4. Припинення роботи сервера
 
 Необхідно повернутися до терміналу і натиснути комбінацію клавіш Ctrl + C
+
+---

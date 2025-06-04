@@ -5,9 +5,23 @@ const articleSchema = Joi.object({
     text: Joi.string().required().min(3),
 })
 
+const updateManyArticlesSchema = Joi.object({
+    filter: Joi.object().min(1).required().pattern(Joi.string(), Joi.any()),
+    update: Joi.object().min(1).required().pattern(Joi.string(), Joi.any()),
+}).required();
+
+const replaceArticleSchema = Joi.object({
+    query: Joi.object().min(1).required().pattern(Joi.string(), Joi.any()),
+    replacement: Joi.object().min(1).required()
+}).required();
+
 const validateArticleBody = celebrate({
     [Segments.BODY]: articleSchema
 })
+
+const validateUpdateManyArticlesBody = celebrate({
+    [Segments.BODY]: updateManyArticlesSchema
+});
 
 const validateParamsArticleId = celebrate({
     [Segments.PARAMS]: Joi.object({
@@ -15,12 +29,8 @@ const validateParamsArticleId = celebrate({
     })
 })
 
-export { validateArticleBody, validateParamsArticleId }
+const validateReplaceArticle = celebrate({
+    [Segments.BODY]: replaceArticleSchema
+}, { abortEarly: false });
 
-// export const validateArticleInput = (req, res, next) => {
-//     const { title } = req.body
-//     if (!title || title.trim() === '') {
-//         return res.status(400).send('Bad Request: Article title is required and cannot be empty.')
-//     }
-//     next()
-// }
+export { validateArticleBody, validateParamsArticleId, validateUpdateManyArticlesBody, validateReplaceArticle }

@@ -84,7 +84,7 @@ const postArticleHandler = async (req, res) => {
         res.status(201).json({
             message: 'Article created!',
             articleId: result.insertedId,
-            aricle: { _id: result.insertedId, title, text }
+            article: { _id: result.insertedId, title, text }
         });
     } catch (error) {
         console.error('Error: post article error', error);
@@ -209,7 +209,7 @@ const replaceArticleHandler = async (req, res) => {
             updatedAt: new Date()
         };
 
-        const result = await articlesCollection.replaceOne(query, articleReplacement);
+        const result = await articlesCollection.replaceOne(filter, articleReplacement);
 
         if (result.matchedCount === 0) {
             return res.status(404).json({ message: 'Article for replacement was not found' });

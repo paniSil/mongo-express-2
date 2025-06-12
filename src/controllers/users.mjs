@@ -35,6 +35,8 @@ const postUsersHandler = async (req, res) => {
             name,
             email,
             password: hashedPassword,
+            createdAt: new Date(),
+            updatedAt: new Date(),
             age,
             role: 'admin',
             resetToken: null,
@@ -88,6 +90,8 @@ const putUserByIdHandler = async (req, res) => {
         if (name) updates.name = name;
         if (email) updates.email = email;
         if (age) updates.age = age;
+
+        updates.updatedAt = new Date();
 
         if (Object.keys(updates).length === 0) {
             return res.status(400).json({ message: 'No update data' });
